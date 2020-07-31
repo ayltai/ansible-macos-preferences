@@ -1,0 +1,12 @@
+---
+- name: restarts Finder
+  command: killall Finder
+
+- name: restarts Dock
+  command: killall Dock
+
+- name: restarts SystemUIServer
+  command: killall SystemUIServer
+
+- name: restarts Touch Bar
+  command: killall ControlStrip

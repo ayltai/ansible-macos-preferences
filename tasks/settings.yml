@@ -1,0 +1,418 @@
+---
+- name: changes Launchpad grid columns
+  osx_defaults:
+    domain: com.apple.dock
+    key: springboard-columns
+    type: int
+    value: "{{ macos_launchpad_grid_columns }}"
+
+- name: changes Launchpad grid rows
+  osx_defaults:
+    domain: com.apple.dock
+    key: springboard-rows
+    type: int
+    value: "{{ macos_launchpad_grid_rows }}"
+
+- name: disables disk image verification
+  osx_defaults:
+    domain: com.apple.frameworks.diskimages
+    key: "{{ item }}"
+    type: bool
+    value: 'true'
+  with_items:
+    - skip-verify
+    - skip-verify-locked
+    - skip-verify-remote
+  when: macos_disable_disk_image_verification
+
+- name: disables Gatekeeper
+  become: yes
+  command: spctl --master-disable
+  when: macos_disable_gate_keeper
+
+- name: disables Game Center
+  command: launchctl unload -w /System/Library/LaunchAgents/com.apple.gamed.plist 2> /dev/null
+  when:
+    - macos_disable_game_center
+    - "'disabled' in macos_sip.stdout"
+
+- name: disables smart quotes
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: NSAutomaticQuoteSubstitutionEnabled
+    type: bool
+    value: 'false'
+  when: macos_disable_smart_quotes
+
+- name: disables smart dashes
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: NSAutomaticDashSubstitutionEnabled
+    type: bool
+    value: 'false'
+  when: macos_disable_smart_dashes
+
+- name: disables sudden motion sensor
+  become: yes
+  command: pmset -a sms 0
+  when: macos_disable_sms
+
+- block:
+  - name: disables hibernation
+    become: yes
+    command: pmset -a hibernatemode 0
+
+  - name: unlocks sleep image
+    become: yes
+    command: chflags nouchg /private/var/vm/sleepimage
+
+  - name: removes sleep image
+    become: yes
+    file:
+      path: /private/var/vm/sleepimage
+      state: absent
+      force: yes
+      remote_src: yes
+
+  - name: creates a dummy sleep image
+    become: yes
+    file:
+      path: /private/var/vm/sleepimage
+      state: touch
+      remote_src: yes
+
+  - name: locks the dummy sleep image
+    become: yes
+    command: chflags uchg /private/var/vm/sleepimage
+  when:
+    - macos_disable_hibernation
+    - "'disabled' in macos_sip.stdout"
+
+- name: disables Photos from opening automatically
+  osx_defaults:
+    domain: com.apple.ImageCapture
+    key: disableHotPlug
+    type: bool
+    value: 'true'
+  when: macos_disable_photos_auto_open
+
+- block:
+  - name: requires password immediately after sleep or screen saver begins
+    osx_defaults:
+      domain: com.apple.screensaver
+      key: askForPassword
+      type: int
+      value: '1'
+
+  - name: requires password immediately after sleep or screen saver begins
+    osx_defaults:
+      domain: com.apple.screensaver
+      key: askForPasswordDelay
+      type: int
+      value: '0'
+  when: macos_ask_password_immediately
+
+- name: saves screenshots in PNG format
+  osx_defaults:
+    domain: com.apple.screencapture
+    key: type
+    type: string
+    value: "{{ macos_default_screenshot_format }}"
+  notify:
+    - restarts SystemUIServer
+
+- name: saves screenshots to Downloads
+  osx_defaults:
+    domain: com.apple.screencapture
+    key: location
+    type: string
+    value: "{{ macos_default_screenshot_location }}"
+  notify:
+    - restarts SystemUIServer
+
+- name: enables subpixel font rendering on external monitors
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleFontSmoothing
+    type: int
+    value: '2'
+  when: macos_enable_subpixel_font_rendering
+
+- name: sets default location for Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: NewWindowTarget
+    type: string
+    value: PfLo
+  notify:
+    - restarts Finder
+
+- name: sets default location for Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: NewWindowTargetPath
+    type: string
+    value: "{{ macos_default_finder_location }}"
+  notify:
+    - restarts Finder
+
+- name: shows file extensions in Finder
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleShowAllExtensions
+    type: bool
+    value: 'true'
+  notify:
+    - restarts Finder
+  when: macos_show_finder_file_extension
+
+- name: shows status bar in Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: ShowStatusBar
+    type: bool
+    value: 'true'
+  notify:
+    - restarts Finder
+  when: macos_show_finder_status_bar
+
+- name: shows Quit option in Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: QuitMenuItem
+    type: bool
+    value: 'true'
+  notify:
+    - restarts Finder
+  when: macos_show_finder_quit
+
+- name: keeps folders on top when sorting by name in Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: _FXSortFoldersFirst
+    type: bool
+    value: 'true'
+  when: macos_finder_sort_folder
+
+- name: disables warnings when changing file extensions in Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: FXEnableExtensionChangeWarning
+    type: bool
+    value: 'false'
+  notify:
+    - restarts Finder
+  when: macos_disable_file_extension_warning
+
+- name: sets default view style in Finder
+  osx_defaults:
+    domain: com.apple.finder
+    key: FXPreferredViewStyle
+    type: string
+    value: "{{ macos_default_finder_view_style }}"
+  notify:
+    - restarts Finder
+
+- block:
+  - name: enables spring loading feature
+    osx_defaults:
+      domain: NSGlobalDomain
+      key: com.apple.springing.enabled
+      type: bool
+      value: 'true'
+
+  - name: sets spring loading delay
+    osx_defaults:
+      domain: NSGlobalDomain
+      key: com.apple.springing.delay
+      type: float
+      value: "{{ macos_spring_loading_delay }}"
+  when: macos_spring_loading_enabled
+
+- name: disables .DS_Store file creation on network volumes
+  osx_defaults:
+    domain: com.apple.desktopservices
+    key: DSDontWriteNetworkStores
+    type: bool
+    value: 'true'
+  when: macos_disable_ds_store
+
+- name: disables warnings about emptying trash
+  osx_defaults:
+    domain: com.apple.finder
+    key: WarnOnEmptyTrash
+    type: bool
+    value: 'false'
+  notify:
+    - restarts Finder
+  when: macos_disable_empty_trash_warning
+
+- name: changes Dock position
+  osx_defaults:
+    domain: com.apple.dock
+    key: orientation
+    type: string
+    value: "{{ macos_dock_position }}"
+  notify:
+    - restarts Dock
+
+- name: sets Dock icon size
+  osx_defaults:
+    domain: com.apple.dock
+    key: tilesize
+    type: int
+    value: "{{ macos_dock_tile_size }}"
+  notify:
+    - restarts Dock
+
+- name: locks Dock size
+  osx_defaults:
+    domain: com.apple.Dock
+    key: size-immutable
+    type: bool
+    value: 'true'
+  notify:
+    - restarts Dock
+
+- name: enables Dock icons spring loading
+  osx_defaults:
+    domain: com.apple.dock
+    key: enable-spring-load-actions-on-all-items
+    type: bool
+    value: 'true'
+  notify:
+    - restarts Dock
+  when: macos_dock_spring_loading
+
+- name: disables showing recent applications in Dock
+  osx_defaults:
+    domain: com.apple.dock
+    key: show-recents
+    type: bool
+    value: 'false'
+  when: macos_dock_hide_recent_apps
+
+- name: changes Touch Bar style
+  osx_defaults:
+    domain: com.apple.touchbar.agent
+    key: PresentationModeGlobal
+    type: string
+    value: "{{ macos_touch_bar_style }}"
+  notify:
+    - restarts Touch Bar
+
+- name: sets Terminal character encoding
+  osx_defaults:
+    domain: com.apple.terminal
+    key: StringEncodings
+    type: array
+    value:
+      - '4'
+  when: macos_terminal_encoding_utf8
+
+- name: sets default Terminal theme
+  osx_defaults:
+    domain: com.apple.terminal
+    key: "{{ item }}"
+    type: string
+    value: "{{ macos_default_terminal_theme }}"
+  with_items:
+    - Default Window Settings
+    - Startup Window Settings
+
+- name: disables swipe navigation in Google Chrome
+  osx_defaults:
+    domain: com.google.Chrome
+    key: AppleEnableSwipeNavigateWithScrolls
+    type: bool
+    value: 'true'
+  when: macos_disable_chrome_swipe_navigation
+
+- name: sets theme to dark mode
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleInterfaceStyle
+    type: string
+    value: 'Dark'
+
+- name: disables iTunes media keys
+  command: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+  when: macos_disable_itunes_media_keys
+
+- name: sets accent color
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleAccentColor
+    type: string
+    value: "{{ macos_accent_color }}"
+
+- name: sets highlight color
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleHighlightColor
+    type: string
+    value: "{{ macos_highlight_color }}"
+
+- name: disables 'shake mouse pointer to locate' feature
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: CGDisableCursorLocationMagnification
+    type: bool
+    value: 'true'
+  when: macos_disable_shake_mouse
+
+- name: puts display to sleep due to inactivity
+  become: yes
+  command: "pmset displaysleep {{ macos_display_sleep }}"
+  changed_when: no
+
+- name: puts computer to sleep due to inactivity
+  become: yes
+  command: "pmset sleep {{ macos_computer_sleep }}"
+  changed_when: no
+
+- name: disables system sleep
+  become: yes
+  command: systemsetup -setcomputersleep Never
+  when: macos_disable_sleep
+
+- name: always keeps windows
+  osx_defaults:
+    domain: NSGlobalDomain
+    key: NSQuitAlwaysKeepsWindows
+    type: bool
+    value: 'true'
+
+- name: enables faster Time Machine backup
+  become: yes
+  command: sysctl debug.lowpri_throttle_enabled=0
+  when: macos_faster_time_machine_backup
+
+- name: disables memory compression
+  become: yes
+  command: nvram boot-args="vm_compressor=2"
+  when:
+    - macos_disable_memory_compression
+    - "'disabled' in macos_sip.stdout"
+
+- name: disables crash reports
+  become: yes
+  command: "launchctl unload -w {{ item }}"
+  with_items:
+    - /System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist
+    - /System/Library/LaunchDaemons/com.apple.spindump.plist
+    - /System/Library/LaunchDaemons/com.apple.tailspind.plist
+  when:
+    - macos_disable_crash_report
+    - "'disabled' in macos_sip.stdout"
+
+- name: changes update frequency
+  osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: ScheduleFrequency
+    type: int
+    value: "{{ macos_update_frequency }}"
+
+- name: changes default shell
+  command: "chsh -s /bin/{{ macos_default_shell }}"
+  changed_when: no
