@@ -62,7 +62,7 @@ ansible-galaxy install ayltai.macos_preferences
 | `macos_dock_position` | `string` | `right` | Sets the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac) position. Supports `left`, `right` and `bottom`. |
 | `macos_dock_tile_size` | `integer` | 32 | Sets the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac) size in pixels. |
 | `macos_dock_lock_size` | `boolean` | Yes | Disable manual resizing of the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
-| `macos_dock_spring_loading` | `boolean` | Enables spring loading in the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
+| `macos_dock_spring_loading` | `boolean` |  Yes | Enables spring loading in the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
 | `macos_dock_hide_recent_apps` | `boolean` | Yes | Disables showing recent applications in the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
 | `macos_terminal_encoding_utf8` | `boolean` | Yes | Sets the default character encoding to UTF-8 in [Terminal](https://support.apple.com/guide/terminal/welcome/mac). |
 | `macos_default_terminal_theme` | `string` | `Pro` | Sets the default [Terminal](https://support.apple.com/guide/terminal/welcome/mac) theme. |
