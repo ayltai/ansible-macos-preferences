@@ -27,11 +27,11 @@
 
 - name: disables Gatekeeper
   become: yes
-  command: spctl --master-disable
+  ansible.builtin.command: spctl --master-disable
   when: macos_disable_gate_keeper
 
 - name: disables Game Center
-  command: launchctl unload -w /System/Library/LaunchAgents/com.apple.gamed.plist 2> /dev/null
+  ansible.builtin.command: launchctl unload -w /System/Library/LaunchAgents/com.apple.gamed.plist 2> /dev/null
   when:
     - macos_disable_game_center
     - "'disabled' in macos_sip.stdout"
@@ -54,21 +54,22 @@
 
 - name: disables sudden motion sensor
   become: yes
-  command: pmset -a sms 0
+  ansible.builtin.command: pmset -a sms 0
   when: macos_disable_sms
 
-- block:
+- name: when macos_disable_hibernation is set to true
+  block:
   - name: disables hibernation
     become: yes
-    command: pmset -a hibernatemode 0
+    ansible.builtin.command: pmset -a hibernatemode 0
 
   - name: unlocks sleep image
     become: yes
-    command: chflags nouchg /private/var/vm/sleepimage
+    ansible.builtin.command: chflags nouchg /private/var/vm/sleepimage
 
   - name: removes sleep image
     become: yes
-    file:
+    ansible.builtin.file:
       path: /private/var/vm/sleepimage
       state: absent
       force: yes
@@ -76,14 +77,14 @@
 
   - name: creates a dummy sleep image
     become: yes
-    file:
+    ansible.builtin.file:
       path: /private/var/vm/sleepimage
       state: touch
       remote_src: yes
 
   - name: locks the dummy sleep image
     become: yes
-    command: chflags uchg /private/var/vm/sleepimage
+    ansible.builtin.command: chflags uchg /private/var/vm/sleepimage
   when:
     - macos_disable_hibernation
     - "'disabled' in macos_sip.stdout"
@@ -96,7 +97,8 @@
     value: 'true'
   when: macos_disable_photos_auto_open
 
-- block:
+- name: when macos_ask_password_immediately is set to true
+  block:
   - name: requires password immediately after sleep or screen saver begins
     osx_defaults:
       domain: com.apple.screensaver
@@ -213,7 +215,8 @@
   notify:
     - restarts Finder
 
-- block:
+- name: when macos_spring_loading_enabled is set to true
+  block:
   - name: enables spring loading feature
     osx_defaults:
       domain: NSGlobalDomain
@@ -292,15 +295,6 @@
     value: 'false'
   when: macos_dock_hide_recent_apps
 
-- name: changes Touch Bar style
-  osx_defaults:
-    domain: com.apple.touchbar.agent
-    key: PresentationModeGlobal
-    type: string
-    value: "{{ macos_touch_bar_style }}"
-  notify:
-    - restarts Touch Bar
-
 - name: sets Terminal character encoding
   osx_defaults:
     domain: com.apple.terminal
@@ -336,7 +330,7 @@
     value: 'Dark'
 
 - name: disables iTunes media keys
-  command: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+  ansible.builtin.command: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
   when: macos_disable_itunes_media_keys
 
 - name: sets accent color
@@ -363,17 +357,17 @@
 
 - name: puts display to sleep due to inactivity
   become: yes
-  command: "pmset displaysleep {{ macos_display_sleep }}"
+  ansible.builtin.command: "pmset displaysleep {{ macos_display_sleep }}"
   changed_when: no
 
 - name: puts computer to sleep due to inactivity
   become: yes
-  command: "pmset sleep {{ macos_computer_sleep }}"
+  ansible.builtin.command: "pmset sleep {{ macos_computer_sleep }}"
   changed_when: no
 
 - name: disables system sleep
   become: yes
-  command: systemsetup -setcomputersleep Never
+  ansible.builtin.command: systemsetup -setcomputersleep Never
   when: macos_disable_sleep
 
 - name: always keeps windows
@@ -385,19 +379,19 @@
 
 - name: enables faster Time Machine backup
   become: yes
-  command: sysctl debug.lowpri_throttle_enabled=0
+  ansible.builtin.command: sysctl debug.lowpri_throttle_enabled=0
   when: macos_faster_time_machine_backup
 
 - name: disables memory compression
   become: yes
-  command: nvram boot-args="vm_compressor=2"
+  ansible.builtin.command: nvram boot-args="vm_compressor=2"
   when:
     - macos_disable_memory_compression
     - "'disabled' in macos_sip.stdout"
 
 - name: disables crash reports
   become: yes
-  command: "launchctl unload -w {{ item }}"
+  ansible.builtin.command: "launchctl unload -w {{ item }}"
   with_items:
     - /System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist
     - /System/Library/LaunchDaemons/com.apple.spindump.plist
@@ -414,5 +408,5 @@
     value: "{{ macos_update_frequency }}"
 
 - name: changes default shell
-  command: "chsh -s /bin/{{ macos_default_shell }}"
+  ansible.builtin.command: "chsh -s /bin/{{ macos_default_shell }}"
   changed_when: no

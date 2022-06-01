@@ -3,7 +3,7 @@
 [![GitHub workflow status](https://img.shields.io/github/workflow/status/ayltai/ansible-macos-preferences/CI?style=flat)](https://github.com/ayltai/ansible-macos-preferences/actions)
 [![Ansible quality score](https://img.shields.io/badge/quality-5-success)](https://galaxy.ansible.com/ayltai/macos_preferences)
 [![Ansible role](https://img.shields.io/badge/role-ayltai.macos_preferences-blue)](https://galaxy.ansible.com/ayltai/macos_preferences)
-![Maintenance](https://img.shields.io/maintenance/yes/2020?style=flat)
+![Maintenance](https://img.shields.io/maintenance/yes/2022?style=flat)
 [![Release](https://img.shields.io/github/release/ayltai/ansible-macos-preferences.svg?style=flat)](https://github.com/ayltai/ansible-macos-preferences/releases)
 [![License](https://img.shields.io/github/license/ayltai/ansible-macos-preferences.svg?style=flat)](https://github.com/ayltai/ansible-macos-preferences/blob/master/LICENSE)
 
@@ -64,7 +64,6 @@ ansible-galaxy install ayltai.macos_preferences
 | `macos_dock_lock_size` | `boolean` | Yes | Disable manual resizing of the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
 | `macos_dock_spring_loading` | `boolean` | Enables spring loading in the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
 | `macos_dock_hide_recent_apps` | `boolean` | Yes | Disables showing recent applications in the [Dock](https://support.apple.com/guide/macbook-air/apd4b7fb731f/mac). |
-| `macos_touch_bar_style` | `string` | `fullControlStrip` | Sets the [Touch Bar](https://support.apple.com/HT207055) style. Supports `app`, `appWithControlStrip`, `fullControlStrip`, `functionKeys`, `workflows`, `workflowsWithControlStrip`, `spaces` and `spacesWithControlStrip`. |
 | `macos_terminal_encoding_utf8` | `boolean` | Yes | Sets the default character encoding to UTF-8 in [Terminal](https://support.apple.com/guide/terminal/welcome/mac). |
 | `macos_default_terminal_theme` | `string` | `Pro` | Sets the default [Terminal](https://support.apple.com/guide/terminal/welcome/mac) theme. |
 | `macos_disable_chrome_swipe_navigation` | `boolean` | Yes | Disable swipe navigation in [Google Chrome](https://www.google.com/intl/en_us/chrome). |

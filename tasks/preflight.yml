@@ -1,11 +1,11 @@
 ---
 - name: checks System Integrity Protection status
-  command: csrutil status
+  ansible.builtin.command: csrutil status
   changed_when: no
   register: macos_sip
 
 - name: checks the status of System Integrity Protection
-  pause:
+  ansible.builtin.pause:
     prompt: System Integrity Protection is enabled. Some macOS settings will not be applied. If this is not what you want, press 'Command+C' to quit now
     seconds: "{{ macos_pause }}"
   when: "'enabled' in macos_sip.stdout"

@@ -30,7 +30,6 @@ macos_dock_tile_size: 32
 macos_dock_lock_size: yes
 macos_dock_spring_loading: yes
 macos_dock_hide_recent_apps: yes
-macos_touch_bar_style: fullControlStrip
 macos_terminal_encoding_utf8: yes
 macos_default_terminal_theme: Pro
 macos_disable_chrome_swipe_navigation: yes

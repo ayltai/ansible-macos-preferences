@@ -1,12 +1,9 @@
 ---
 - name: restarts Finder
-  command: killall Finder
+  ansible.builtin.command: killall Finder
 
 - name: restarts Dock
-  command: killall Dock
+  ansible.builtin.command: killall Dock
 
 - name: restarts SystemUIServer
-  command: killall SystemUIServer
-
-- name: restarts Touch Bar
-  command: killall ControlStrip
+  ansible.builtin.command: killall SystemUIServer
