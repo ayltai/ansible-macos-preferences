@@ -66,6 +66,7 @@
   - name: unlocks sleep image
     become: yes
     ansible.builtin.command: chflags nouchg /private/var/vm/sleepimage
+    ignore_errors: yes
 
   - name: removes sleep image
     become: yes
@@ -74,6 +75,7 @@
       state: absent
       force: yes
       remote_src: yes
+    ignore_errors: yes
 
   - name: creates a dummy sleep image
     become: yes
@@ -81,10 +83,12 @@
       path: /private/var/vm/sleepimage
       state: touch
       remote_src: yes
+    ignore_errors: yes
 
   - name: locks the dummy sleep image
     become: yes
     ansible.builtin.command: chflags uchg /private/var/vm/sleepimage
+    ignore_errors: yes
   when:
     - macos_disable_hibernation
     - "'disabled' in macos_sip.stdout"
@@ -263,7 +267,7 @@
   osx_defaults:
     domain: com.apple.dock
     key: tilesize
-    type: int
+    type: float
     value: "{{ macos_dock_tile_size }}"
   notify:
     - restarts Dock
@@ -337,7 +341,7 @@
   osx_defaults:
     domain: NSGlobalDomain
     key: AppleAccentColor
-    type: string
+    type: int
     value: "{{ macos_accent_color }}"
 
 - name: sets highlight color
